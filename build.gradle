@@ -47,7 +47,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'ApplicationKt'
+        attributes 'Main-Class': 'hypr.PlatformKt'
     }
 
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
