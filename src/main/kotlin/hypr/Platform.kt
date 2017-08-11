@@ -15,22 +15,35 @@ import org.ektorp.impl.*
 import org.ektorp.support.*
 import com.fasterxml.jackson.annotation.*
 
+import java.util.UUID
+
 val logger: Logger = LoggerFactory.getLogger("main")
 
 @JsonIgnoreProperties("id", "revision")
-data class Generator(
-  @JsonProperty("name") var name: String, 
-  @JsonProperty("_id") var id:String,
-  @JsonProperty("_rev") var revision: String? = null
+data class GeneratorEvent(
+  @JsonProperty("name") var name: String?, 
+  @JsonProperty("type" ) var type: String?,
+  @JsonProperty("_id") var id:String? = UUID.randomUUID().toString(),
+  @JsonProperty("_rev") var revision: String? = null,
+  @JsonProperty("viewer_operation" ) var viewer_operation: String? = "FaceViewer",
+  @JsonProperty("input_width" ) var input_width: Int? = 128,
+  @JsonProperty("input_height" ) var input_height: Int? = 128,
+  @JsonProperty("input_channels" ) var input_channels: Int? = 3,
+  @JsonProperty("input_type" ) var input_type: String? = "image",
+  @JsonProperty("output_type" ) var output_type: String? = "image",
+  @JsonProperty("output_width" ) var output_width: Int? = 128,
+  @JsonProperty("output_height" ) var output_height: Int? = 128,
+  @JsonProperty("output_channels" ) var output_channels: Int? = 3
 ) 
-fun main(args: Array<String>) {
 
+
+fun main(args: Array<String>) {
     val application = Platform(8080)
     application.start()
 }
 
 
-class GeneratorRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Generator>(Generator::class.java, db) {
+class GeneratorRepository(db: CouchDbConnector) : CouchDbRepositorySupport<GeneratorEvent>(GeneratorEvent::class.java, db) {
 }
 
 class Platform(val port: Int = 8080) {
@@ -50,14 +63,21 @@ class Platform(val port: Int = 8080) {
 
         port(8080)
 
-        get("/v1/models.json") { req, res ->
+        get("/v1/generators.json") { req, res ->
           res.type("application/json")
           val results = repo.getAll()
           Gson().toJson(results)
         }
-        post("/v1/models.json") { req, res ->
+        post("/v1/generators.json") { req, res ->
           res.type("application/json")
-          repo.add(Generator("Test", "test"))
+          // user uploads model to platform
+          repo.add(GeneratorEvent("Test", "new"))
+          // user downloads model
+          repo.add(GeneratorEvent("Test", "download"))
+          // user purchases model
+          repo.add(GeneratorEvent("Test", "purchase"))
+          // user rates model
+          repo.add(GeneratorEvent("Test", "rating"))
         }
     }
 
